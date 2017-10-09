@@ -1,0 +1,72 @@
+
+---
+- hosts: localhost
+  tasks:
+    ##### Tasks to build docker container - to be tested #####
+    # - name: "Install docker dependencies"
+    #   apt:
+    #     name: "{{ item }}"
+    #     update_cache: yes
+    #     state: latest
+    #   with_items:
+    #     - "python-docker"
+    #   become: yes
+
+    # - name: "Pull docker ubuntu image"
+    #   docker_image:
+    #     name: ubuntu:16.04
+    #     state: present
+    #
+    # - name: "Build precom docker image"
+    #   docker_image:
+    #     name: ubuntu-dev-sshd
+    #     path: "/srv/docker-template/Dockerfile"
+    #     state: present
+    #     tag: v1
+    #   become: yes
+
+    - name: "Start precom container"
+      docker_container:
+        name: "container-temp"
+        image: "ubuntu-dev:1.0"
+        published_ports: "80:80,3306:3306"
+        state: started
+      register: docker_container.NetworkSettings.IPAddress
+
+    # - name: "Display container IP address"
+    #   debug:
+    #     msg: "Container has the following IP address :  {{ docker_container.NetworkSettings.IPAddress }}"
+
+    - name: "Add container IP to docker-nodes group"
+      add_host:
+        host: "{{ docker_container.NetworkSettings.IPAddress }}"
+        groups: "docker-nodes"
+        ansible_user: root
+        ansible_password: "precom"
+      when: docker_container.NetworkSettings.IPAddress != ""
+
+    - name: "Purge {{ docker_container.NetworkSettings.IPAddress }} from known_hosts file"
+      known_hosts:
+        path: "~/.ssh/known_hosts"
+        name: "{{ docker_container.NetworkSettings.IPAddress }}"
+        state: absent
+
+
+- hosts: docker-nodes
+  tasks:
+    - name: "Create file in docker container in /root/TEST.txt"
+      file:
+        path: /root/TEST.txt
+        state: touch
+        owner: root
+        group: root
+        mode: 0644
+
+# - name: "Install dependencies to use ansible docker"
+#   hosts: localhost
+#   pip:
+#     name:
+
+# - name: "Download SSHD Dockerfile from toolbox"
+#   get_url:
+#     url: "http://podbox.precom-obseques.fr"
