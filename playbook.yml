@@ -27,7 +27,7 @@
 
     - name: "Start precom container"
       docker_container:
-        name: "container-temp"
+        name: "docker-front"
         image: "ubuntu-dev:1.0"
         published_ports: "80:80,3306:3306"
         state: started
@@ -51,7 +51,6 @@
         name: "{{ docker_container.NetworkSettings.IPAddress }}"
         state: absent
 
-
 - hosts: docker-nodes
   tasks:
     - name: "Create file in docker container in /root/TEST.txt"
@@ -61,6 +60,12 @@
         owner: root
         group: root
         mode: 0644
+
+- hosts: docker-nodes
+  any_errors_fatal: yes
+  roles:
+    - ansible-apache
+  tags: [installation]
 
 # - name: "Install dependencies to use ansible docker"
 #   hosts: localhost
