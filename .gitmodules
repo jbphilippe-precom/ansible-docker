@@ -1,0 +1,3 @@
+[submodule "roles/ansible-apache"]
+	path = roles/ansible-apache
+	url = https://github.com/jbphilippe-precom/ansible-apache
