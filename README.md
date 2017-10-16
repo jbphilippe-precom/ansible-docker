@@ -14,3 +14,6 @@ sudo apt-get install python-pip
 sudo pip install ansible==2.4
 
 ansible-playbook -i ./hosts ./playbook.yml
+
+
+https://www.docker.com/sites/default/files/2016-01-26_0907_1.jpg
